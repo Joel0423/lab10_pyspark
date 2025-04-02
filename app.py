@@ -22,13 +22,13 @@ if uploaded_file:
     df_pandas = pd.read_csv(uploaded_file)
     df = spark.createDataFrame(df_pandas)
     st.write("### Data Sample:")
-    st.write(df.limit(5).toPandas())
+    st.table(df.limit(50).toPandas())
 
     # Data Cleaning & Wrangling
     if st.button("Clean Data"):
-        df = df.dropna()
+        df = df.na.drop()
         st.write("### Cleaned Data Sample:")
-        st.write(df.limit(5).toPandas())
+        st.table(df.limit(50).toPandas())
 
     if st.button("Perform EDA"):
         pdf = df.toPandas()
