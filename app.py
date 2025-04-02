@@ -29,7 +29,6 @@ if uploaded_file:
         st.write("### Cleaned Data Sample:")
         st.write(df.limit(5).toPandas())
 
-    # Exploratory Data Analysis
     if st.button("Perform EDA"):
         pdf = df.toPandas()
         fig, ax = plt.subplots()
@@ -45,6 +44,7 @@ if uploaded_file:
         st.write("Regression Model Coefficients:", model.coefficients)
         st.write("Intercept:", model.intercept)
     
+
     # Clustering
     if st.button("Run Clustering"):
         assembler = VectorAssembler(inputCols=['Age', 'Positive Feedback Count'], outputCol='features')
