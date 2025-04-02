@@ -26,6 +26,8 @@ if uploaded_file:
 
     # Data Cleaning & Wrangling
     if st.button("Clean Data"):
+        Dict_Null = {col:df.filter(df[col].isNull()).count() for col in df.columns}
+        print(Dict_Null)
         df = df.na.drop()
         st.write("### Cleaned Data Sample:")
         st.table(df.limit(50).toPandas())
