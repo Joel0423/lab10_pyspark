@@ -1,82 +1,63 @@
 import streamlit as st
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, count, mean, when
-from pyspark.ml.feature import VectorAssembler, StringIndexer
+from pyspark.sql.functions import col, count, mean
+from pyspark.ml.feature import VectorAssembler
 from pyspark.ml.regression import LinearRegression
 from pyspark.ml.clustering import KMeans
 from pyspark.ml.classification import LogisticRegression
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 def create_spark_session():
-    return SparkSession.builder.appName("ProductReviewAnalysis").getOrCreate()
+    return SparkSession.builder.appName("WomensClothingReview").getOrCreate()
 
-@st.cache_resource
+# Initialize Streamlit App
+st.title("Women's Clothing Reviews - EDA & ML with PySpark")
 
-def load_data(spark, file):
-    return spark.read.csv(file, header=True, inferSchema=True)
-
-def clean_data(df):
-    df = df.dropDuplicates()
-    df = df.dropna()
-    return df
-
-def handle_missing_values(df):
-    for col_name in df.columns:
-        df = df.fillna({col_name: df.select(mean(col(col_name))).collect()[0][0]})
-    return df
-
-def exploratory_data_analysis(df):
-    return df.describe().toPandas()
-
-def regression_model(df):
-    assembler = VectorAssembler(inputCols=['Age', 'Positive Feedback Count'], outputCol='features')
-    df = assembler.transform(df)
-    lr = LinearRegression(featuresCol='features', labelCol='Rating')
-    model = lr.fit(df)
-    return model.summary.r2
-
-def clustering_model(df):
-    assembler = VectorAssembler(inputCols=['Age', 'Positive Feedback Count'], outputCol='features')
-    df = assembler.transform(df)
-    kmeans = KMeans(k=3, seed=1, featuresCol='features')
-    model = kmeans.fit(df)
-    return model.clusterCenters()
-
-def classification_model(df):
-    indexer = StringIndexer(inputCol='Recommended IND', outputCol='label')
-    df = indexer.fit(df).transform(df)
-    assembler = VectorAssembler(inputCols=['Age', 'Positive Feedback Count'], outputCol='features')
-    df = assembler.transform(df)
-    lr = LogisticRegression(featuresCol='features', labelCol='label')
-    model = lr.fit(df)
-    return model.summary.accuracy
-
-st.title("Product Review Analysis using PySpark")
-
-spark = create_spark_session()
-uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
+# Upload CSV
+uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
 if uploaded_file:
-    df_pandas = pd.read_csv(uploaded_file)
-    df = spark.createDataFrame(df_pandas)
-    st.write("### Raw Data")
-    st.write(df.show(5))
+    spark = create_spark_session()
+    df = spark.read.csv(uploaded_file, header=True, inferSchema=True)
+    st.write("### Data Sample:")
+    st.write(df.limit(5).toPandas())
 
-    df_cleaned = clean_data(df)
-    st.write("### Cleaned Data")
-    st.write(df_cleaned.show(5))
+    # Data Cleaning & Wrangling
+    if st.button("Clean Data"):
+        df = df.dropna()
+        st.write("### Cleaned Data Sample:")
+        st.write(df.limit(5).toPandas())
 
-    df_no_missing = handle_missing_values(df_cleaned)
-    st.write("### Data after Handling Missing Values")
-    st.write(df_no_missing.show(5))
+    # Exploratory Data Analysis
+    if st.button("Perform EDA"):
+        pdf = df.toPandas()
+        fig, ax = plt.subplots()
+        sns.histplot(pdf['Rating'], bins=5, kde=True, ax=ax)
+        st.pyplot(fig)
 
-    st.write("### Exploratory Data Analysis")
-    st.write(exploratory_data_analysis(df_no_missing))
+    # Regression
+    if st.button("Run Regression"):
+        assembler = VectorAssembler(inputCols=['Age', 'Positive Feedback Count'], outputCol='features')
+        df = assembler.transform(df).select('features', col('Rating').alias('label'))
+        lr = LinearRegression()
+        model = lr.fit(df)
+        st.write("Regression Model Coefficients:", model.coefficients)
+        st.write("Intercept:", model.intercept)
+    
+    # Clustering
+    if st.button("Run Clustering"):
+        assembler = VectorAssembler(inputCols=['Age', 'Positive Feedback Count'], outputCol='features')
+        df = assembler.transform(df).select('features')
+        kmeans = KMeans(k=3)
+        model = kmeans.fit(df)
+        st.write("Cluster Centers:", model.clusterCenters())
 
-    st.write("### Regression Model Performance (R2 Score)")
-    st.write(regression_model(df_no_missing))
-
-    st.write("### Clustering Model (Cluster Centers)")
-    st.write(clustering_model(df_no_missing))
-
-    st.write("### Classification Model Accuracy")
-    st.write(classification_model(df_no_missing))
+    # Classification
+    if st.button("Run Classification"):
+        assembler = VectorAssembler(inputCols=['Age', 'Positive Feedback Count'], outputCol='features')
+        df = assembler.transform(df).select('features', col('Recommended IND').alias('label'))
+        log_reg = LogisticRegression()
+        model = log_reg.fit(df)
+        st.write("Classification Model Coefficients:", model.coefficients)
+        st.write("Intercept:", model.intercept)
