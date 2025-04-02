@@ -20,6 +20,7 @@ uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
 if uploaded_file:
     spark = create_spark_session()
     df_pandas = pd.read_csv(uploaded_file)
+    df_pandas = df_pandas.replace("", None)
     df = spark.createDataFrame(df_pandas)
     df = df.replace("", None)
     st.write("### Data Sample:")
