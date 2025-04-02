@@ -80,16 +80,16 @@ if uploaded_file:
 
     # Classification
     if st.button("Run Classification"):
-        assembler = VectorAssembler(inputCols=['Age', 'Positive Feedback Count'], outputCol='features')
+        assembler = VectorAssembler(inputCols=['Age', 'Rating'], outputCol='features')
         df = assembler.transform(df).select('features', col('Recommended IND').alias('label'))
         log_reg = LogisticRegression()
         model = log_reg.fit(df)
         st.write("Classification Model Coefficients:", model.coefficients)
         st.write("Intercept:", model.intercept)
         
-        test_data = spark.createDataFrame([(30, 4), (50, 1)], ["Age", "Positive Feedback Count"])
+        test_data = spark.createDataFrame([(30, 4), (50, 1)], ["Age", "Rating"])
         test_data = assembler.transform(test_data).select("features")
         predictions = model.transform(test_data).select("prediction").toPandas()
-        st.write("Test 1- Age: 30, Feedback: 4")
-        st.write("Test 2- Age: 50, Feedback: 1")
+        st.write("Test 1- Age: 30, Rating: 4")
+        st.write("Test 2- Age: 50, Rating: 1")
         st.write("Test Data Predictions - Recomended IND:", predictions)
