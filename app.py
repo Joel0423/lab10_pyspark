@@ -52,7 +52,7 @@ if uploaded_file:
     if st.button("Perform EDA"):
         pdf = df.toPandas()
         fig, ax = plt.subplots()
-        sns.histplot(pdf['Rating'], bins=5, kde=True, ax=ax)
+        sns.histplot(pdf['Rating'], bins=5, ax=ax)
         st.pyplot(fig)
         
         st.write("### More EDA:")
