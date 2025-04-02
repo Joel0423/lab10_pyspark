@@ -22,7 +22,7 @@ def plot_regression(df_pandas, model):
 
 def plot_clusters(df_pandas, predictions):
     plt.figure(figsize=(8, 6))
-    sns.scatterplot(x=df_pandas['Age'], y=df_pandas['Positive Feedback Count'], hue=predictions, palette='viridis')
+    sns.scatterplot(x=df_pandas['Age'], y=df_pandas['Positive Feedback Count'], hue=predictions.squeeze(), palette='viridis')
     plt.xlabel("Age")
     plt.ylabel("Positive Feedback Count")
     plt.title("K-Means Clusters")
