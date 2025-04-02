@@ -33,7 +33,7 @@ if uploaded_file:
         st.write("### Cleaned Data Sample:")
         st.write(df.limit(50).toPandas())
 
-    # EDA
+    #  EDA
     if st.button("Perform EDA"):
         pdf = df.toPandas()
         fig, ax = plt.subplots()
