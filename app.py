@@ -21,20 +21,19 @@ if uploaded_file:
     spark = create_spark_session()
     df_pandas = pd.read_csv(uploaded_file)
     df_pandas = df_pandas.replace("", None)
-    st.write(df_pandas)
+
     df = spark.createDataFrame(df_pandas)
-    df = df.replace("", None)
     st.write("### Data Sample:")
     st.write(df.limit(50).toPandas())
 
     # Data Cleaning & Wrangling
     if st.button("Clean Data"):
-        Dict_Null = {col:df.filter(df[col].isNull()).count() for col in df.columns}
-        st.write(Dict_Null)
-        df = df.na.drop()
+        df_pandas = df_pandas.dropna()
+        df = spark.createDataFrame(df_pandas)
         st.write("### Cleaned Data Sample:")
         st.write(df.limit(50).toPandas())
 
+    # EDA
     if st.button("Perform EDA"):
         pdf = df.toPandas()
         fig, ax = plt.subplots()
