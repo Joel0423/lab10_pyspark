@@ -21,7 +21,7 @@ if uploaded_file:
     spark = create_spark_session()
     df_pandas = pd.read_csv(uploaded_file)
     df_pandas = df_pandas.replace("", None)
-    st.write(df_pandas.limit(50).toPandas())
+    st.write(df_pandas)
     df = spark.createDataFrame(df_pandas)
     df = df.replace("", None)
     st.write("### Data Sample:")
