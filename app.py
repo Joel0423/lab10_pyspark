@@ -19,7 +19,8 @@ st.title("Women's Clothing Reviews - EDA & ML with PySpark")
 uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
 if uploaded_file:
     spark = create_spark_session()
-    df = spark.read.csv(uploaded_file, header=True, inferSchema=True)
+    df_pandas = pd.read_csv(uploaded_file)
+    df = spark.createDataFrame(df_pandas)
     st.write("### Data Sample:")
     st.write(df.limit(5).toPandas())
 
