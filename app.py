@@ -1,6 +1,6 @@
 import streamlit as st
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, count, mean
+from pyspark.sql.functions import col, count, mean, when
 from pyspark.ml.feature import VectorAssembler
 from pyspark.ml.regression import LinearRegression
 from pyspark.ml.clustering import KMeans
@@ -21,16 +21,15 @@ if uploaded_file:
     spark = create_spark_session()
     df_pandas = pd.read_csv(uploaded_file)
     df = spark.createDataFrame(df_pandas)
+    df = df.replace("", None)
     st.write("### Data Sample:")
-    st.table(df.limit(50).toPandas())
+    st.write(df.limit(50).toPandas())
 
     # Data Cleaning & Wrangling
     if st.button("Clean Data"):
-        Dict_Null = {col:df.filter(df[col].isNull()).count() for col in df.columns}
-        st.write(Dict_Null)
         df = df.na.drop()
         st.write("### Cleaned Data Sample:")
-        st.table(df.limit(50).toPandas())
+        st.write(df.limit(50).toPandas())
 
     if st.button("Perform EDA"):
         pdf = df.toPandas()
