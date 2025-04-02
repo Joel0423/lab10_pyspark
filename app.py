@@ -1,9 +1,6 @@
 import streamlit as st
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, count, mean, when
-def create_spark_session():
-    return SparkSession.builder.appName("WomensClothingReview").getOrCreate()
-
 from pyspark.ml.feature import VectorAssembler
 from pyspark.ml.regression import LinearRegression
 from pyspark.ml.clustering import KMeans
@@ -11,6 +8,9 @@ from pyspark.ml.classification import LogisticRegression
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+
+def create_spark_session():
+    return SparkSession.builder.appName("WomensClothingReview").getOrCreate()
 
 def plot_regression(df_pandas, model):
     plt.figure(figsize=(8, 6))
@@ -28,8 +28,7 @@ def plot_clusters(df_pandas, predictions):
     plt.title("K-Means Clusters")
     st.pyplot(plt)
 
-# Initialize Streamlit App
-st.title("Women's Clothing Reviews - EDA & ML with PySpark")
+st.title("Lab 10: Women's Clothing Reviews")
 
 # Upload CSV
 uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
@@ -88,7 +87,9 @@ if uploaded_file:
         st.write("Classification Model Coefficients:", model.coefficients)
         st.write("Intercept:", model.intercept)
         
-        test_data = spark.createDataFrame([(30, 2), (50, 10)], ["Age", "Positive Feedback Count"])
+        test_data = spark.createDataFrame([(30, 4), (50, 1)], ["Age", "Positive Feedback Count"])
         test_data = assembler.transform(test_data).select("features")
         predictions = model.transform(test_data).select("prediction").toPandas()
-        st.write("Test Data Predictions:", predictions)
+        st.write("Test 1- Age: 30, Feedback: 4")
+        st.write("Test 2- Age: 50, Feedback: 1")
+        st.write("Test Data Predictions - Recomended IND:", predictions)
