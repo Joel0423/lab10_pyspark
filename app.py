@@ -60,7 +60,7 @@ if uploaded_file:
 
     # Regression
     if st.button("Run Regression"):
-        assembler = VectorAssembler(inputCols=['Age', 'Positive Feedback Count'], outputCol='features')
+        assembler = VectorAssembler(inputCols=['Age', 'Rating'], outputCol='features')
         df = assembler.transform(df).select('features', col('Rating').alias('label'))
         lr = LinearRegression()
         model = lr.fit(df)
