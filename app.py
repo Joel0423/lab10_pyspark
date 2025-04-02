@@ -5,14 +5,15 @@ from pyspark.ml.feature import VectorAssembler, StringIndexer
 from pyspark.ml.regression import LinearRegression
 from pyspark.ml.clustering import KMeans
 from pyspark.ml.classification import LogisticRegression
+import pandas as pd
 
 def create_spark_session():
     return SparkSession.builder.appName("ProductReviewAnalysis").getOrCreate()
 
 @st.cache_resource
 
-def load_data(spark, file_path):
-    return spark.read.csv(file_path, header=True, inferSchema=True)
+def load_data(spark, file):
+    return spark.read.csv(file, header=True, inferSchema=True)
 
 def clean_data(df):
     df = df.dropDuplicates()
@@ -53,9 +54,10 @@ def classification_model(df):
 st.title("Product Review Analysis using PySpark")
 
 spark = create_spark_session()
-file_path = st.text_input("Enter the dataset path (CSV file):")
-if file_path:
-    df = load_data(spark, file_path)
+uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
+if uploaded_file:
+    df_pandas = pd.read_csv(uploaded_file)
+    df = spark.createDataFrame(df_pandas)
     st.write("### Raw Data")
     st.write(df.show(5))
 
